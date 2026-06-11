@@ -1,0 +1,138 @@
+# The two loops from the course's production-loop slide:
+#
+#   Loop 1 (every pull request): verify the task itself — build the
+#     environment, run the oracle solution, run the pytest verifier
+#     (must pass), and run the negative control (must fail). No API
+#     keys needed; a contract/skill/verifier edit that breaks the task
+#     shows up red on the diff, before merge.
+#
+#   Loop 2 (weekly cron): run the actual agent eval through the
+#     SkillsBench harness, with and without skills. Catches drift with
+#     no PR attached: model updates, data changes, dependency rot.
+#     Needs ANTHROPIC_API_KEY as a repo secret; results are uploaded
+#     as artifacts (in production: append to your warehouse).
+
+name: skillsbench
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 6 * * 1" # Monday 06:00 UTC — the weekly run
+  workflow_dispatch:
+
+env:
+  TASK: tasks/price-hike-causal-validation
+
+jobs:
+  # ── Loop 1: every PR ─────────────────────────────────────────────
+  verify-task:
+    name: oracle + verifier (no API keys)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build the task environment
+        run: docker build -t phcv-env "$TASK/environment"
+
+      - name: Oracle solves the task, verifier must award reward 1
+        run: |
+          docker run -d --name phcv phcv-env sleep infinity
+          docker cp "$TASK/solution/solve.sh" phcv:/solve.sh
+          docker exec phcv bash /solve.sh
+          docker exec phcv mkdir -p /tests
+          docker cp "$TASK/tests/test_outputs.py" phcv:/tests/
+          docker cp "$TASK/tests/test.sh" phcv:/tests/
+          docker exec phcv bash /tests/test.sh || true
+          reward=$(docker exec phcv cat /logs/verifier/reward.txt)
+          echo "oracle reward: $reward"
+          test "$reward" = "1"
+
+      - name: Negative control — empty container must get reward 0
+        run: |
+          docker run -d --name phcv-neg phcv-env sleep infinity
+          docker exec phcv-neg mkdir -p /tests
+          docker cp "$TASK/tests/test_outputs.py" phcv-neg:/tests/
+          docker cp "$TASK/tests/test.sh" phcv-neg:/tests/
+          docker exec phcv-neg bash /tests/test.sh || true
+          reward=$(docker exec phcv-neg cat /logs/verifier/reward.txt)
+          echo "negative-control reward: $reward"
+          test "$reward" = "0"
+
+  # ── Loop 2: the weekly scheduled agent eval ──────────────────────
+  weekly-agent-eval:
+    name: agent eval, with + without skills
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    needs: verify-task
+    runs-on: ubuntu-latest
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      MODEL: claude-sonnet-4-6
+    steps:
+      - name: Check for API key
+        run: |
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "::warning::ANTHROPIC_API_KEY secret not set - skipping agent eval"
+            echo "SKIP=1" >> "$GITHUB_ENV"
+          fi
+
+      - uses: actions/checkout@v4
+        if: env.SKIP != '1'
+
+      - name: Check out the SkillsBench harness
+        if: env.SKIP != '1'
+        uses: actions/checkout@v4
+        with:
+          repository: benchflow-ai/skillsbench
+          path: harness
+
+      - uses: astral-sh/setup-uv@v4
+        if: env.SKIP != '1'
+
+      - name: Install harness and validate the task
+        if: env.SKIP != '1'
+        working-directory: harness
+        run: |
+          uv sync --locked
+          cp -r "$GITHUB_WORKSPACE/$TASK" tasks/
+          uv run bench tasks check tasks/price-hike-causal-validation
+
+      - name: "Arm 1: with skills (delivery nudged + verified in trace)"
+        if: env.SKIP != '1'
+        working-directory: harness
+        run: |
+          uv run bench run tasks/price-hike-causal-validation \
+            --agent claude-agent-acp --model "$MODEL" \
+            --agent-env BENCHFLOW_SKILL_NUDGE=name \
+            --jobs-dir "$GITHUB_WORKSPACE/jobs/with-skill"
+
+      - name: "Arm 2: no skills (explicit empty skills dir)"
+        if: env.SKIP != '1'
+        working-directory: harness
+        run: |
+          mkdir -p /tmp/empty-skills
+          uv run bench run tasks/price-hike-causal-validation \
+            --agent claude-agent-acp --model "$MODEL" \
+            --skills-dir /tmp/empty-skills \
+            --jobs-dir "$GITHUB_WORKSPACE/jobs/no-skill"
+
+      - name: Collect results rows
+        if: env.SKIP != '1'
+        run: |
+          echo "date,task,harness,model,arm,reward" > results.csv
+          for arm in with-skill no-skill; do
+            reward=$(find "jobs/$arm" -name reward.txt -exec cat {} \; | head -1)
+            echo "$(date -u +%F),price_hike_its,claude-agent-acp,$MODEL,$arm,${reward:-NA}" >> results.csv
+          done
+          cat results.csv
+          # In production this row goes to your warehouse, keyed by
+          # skill + contract version - "did that change help?" is a SELECT.
+
+      - uses: actions/upload-artifact@v4
+        if: env.SKIP != '1'
+        with:
+          name: eval-results
+          path: |
+            results.csv
+            jobs/**/reward.txt
