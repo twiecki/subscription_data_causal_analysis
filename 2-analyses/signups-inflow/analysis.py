@@ -115,6 +115,42 @@ def select_spec(pre: pd.DataFrame) -> dict:
 # --------------------------------------------------------------------------
 # 2. the ITS fit
 # --------------------------------------------------------------------------
+def draws_by_obs(da, n_obs: int) -> np.ndarray:
+    """(chain, draw, obs_ind[, treated_units]) -> (draws, n_obs).
+
+    CausalPy 0.8 carries a singleton `treated_units` dim on post_impact and the
+    predictive groups; 0.9 dropped it. Hard-coding either layout silently breaks
+    on the other version, so normalise here instead.
+    """
+    for d in [d for d in da.dims if d not in ("chain", "draw", "obs_ind")]:
+        if da.sizes[d] != 1:
+            raise ValueError(f"unexpected multi-unit dim {d}={da.sizes[d]}; "
+                             "this analysis assumes a single treated unit")
+        da = da.isel({d: 0}, drop=True)
+    return np.asarray(da.transpose("chain", "draw", "obs_ind")).reshape(-1, n_obs)
+
+
+def pred_da(obj):
+    """Posterior-predictive draws as a DataArray, across CausalPy versions:
+    0.8 returns an InferenceData for pre_pred/post_pred, 0.9 returns y_hat
+    directly."""
+    if hasattr(obj, "groups"):        # InferenceData
+        return obj["posterior_predictive"]["y_hat"]
+    if hasattr(obj, "data_vars"):     # Dataset
+        return obj["y_hat"]
+    return obj                        # already a DataArray
+
+
+def pre_r2(its) -> float:
+    """Pre-period R^2, reported as a symptom only (Trap 2 — never a gate).
+    Key name is version-dependent ('unit_0_r2' in 0.8, plain 'r2' in 0.9)."""
+    s = its.score
+    for k in ("unit_0_r2", "r2"):
+        if k in s:
+            return float(np.asarray(s[k]).mean())
+    return float(np.asarray(list(s.values())[0]).mean())
+
+
 def fit_its(d: pd.DataFrame, treatment: pd.Timestamp, formula: str,
             guard_days: int, sample_kwargs: dict) -> tuple:
     """Fit the counterfactual on pre-treatment data, holding out `guard_days`
@@ -148,8 +184,7 @@ def effect(its, post_index: pd.DatetimeIndex, horizon: int | None = None) -> dic
     the design's own placebo spread. The placebo distribution is what the memo
     leans on for the equivalence claim.
     """
-    imp = its.post_impact.transpose("chain", "draw", "obs_ind", "treated_units")
-    imp = np.asarray(imp).reshape(-1, len(post_index))          # (draws, days)
+    imp = draws_by_obs(its.post_impact, len(post_index))        # (draws, days)
     if horizon is not None:
         imp = imp[:, :horizon]
     obs = np.asarray(its.datapost[OUTCOME], dtype=float)
@@ -178,8 +213,8 @@ def effect(its, post_index: pd.DatetimeIndex, horizon: int | None = None) -> dic
 def residual_gate(its, frame: pd.DataFrame, treatment: pd.Timestamp) -> dict:
     pre_idx = frame.index[frame.index < treatment]
     obs = frame.loc[pre_idx, OUTCOME].astype(float).values
-    pred = np.asarray(its.pre_pred["posterior_predictive"]["y_hat"].transpose(
-        "chain", "draw", "obs_ind", "treated_units")).reshape(-1, len(pre_idx)).mean(axis=0)
+    pred = draws_by_obs(pred_da(its.pre_pred),
+                        len(pre_idx)).mean(axis=0)
     e = obs - pred
     n = len(e)
     t = np.arange(n, dtype=float)
@@ -239,22 +274,37 @@ def poisson_its(d: pd.DataFrame) -> dict:
     fit_end = TREATMENT - pd.Timedelta(days=GUARD_DAYS)
     pre = d.loc[d.index < fit_end]
     post = d.loc[d.index >= TREATMENT]
-    t_pre = (pre["t"] - pre["t"].mean()).values
-    t_post = (post["t"] - pre["t"].mean()).values
-    with pm.Model() as m:
-        a = pm.Normal("a", mu=np.log(pre[OUTCOME].mean()), sigma=0.5)
-        b = pm.Normal("b", mu=0.0, sigma=0.01)
+    # Scale time to YEARS centred on the pre-period. On the raw day index t
+    # spans +/-360 and the post window reaches +540, so a log-linear slope prior
+    # has to be absurdly tight to keep exp(a + b*t) finite — and the geometry is
+    # bad enough that the sampler blows up (observed: r_hat ~2e7 on pymc 5.28).
+    # In years the slope is interpretable and the posterior is well conditioned.
+    scale = 365.25
+    t0 = pre["t"].mean()
+    t_pre = ((pre["t"] - t0) / scale).values
+    t_post = ((post["t"] - t0) / scale).values
+    with pm.Model():
+        a = pm.Normal("a", mu=np.log(pre[OUTCOME].mean()), sigma=0.2)
+        b = pm.Normal("b", mu=0.0, sigma=0.1)   # ~10% log-change per year
         pm.Poisson("y", mu=pm.math.exp(a + b * t_pre), observed=pre[OUTCOME].values)
         idata = pm.sample(**{**SAMPLE_KWARGS, "draws": 1000, "tune": 1000})
+
+    max_rhat = float(az.rhat(idata).to_array().max())
+    div = int(idata.sample_stats["diverging"].sum())
+    if max_rhat > 1.05 or div > 0:
+        # Never let a failed fit reach result.json wearing a number.
+        raise RuntimeError(f"Poisson robustness check did not converge "
+                           f"(max r_hat={max_rhat:.4f}, divergences={div}) — "
+                           f"fix the model, do not report the estimate")
     a_s = idata.posterior["a"].values.reshape(-1)
     b_s = idata.posterior["b"].values.reshape(-1)
     cf = np.exp(a_s[:, None] + b_s[:, None] * t_post[None, :]).mean(axis=1)
     pct = 100.0 * (post[OUTCOME].mean() - cf) / cf
     lo, hi = az.hdi(pct, hdi_prob=0.95)
-    return {"family": "Poisson (log link, linear trend)",
+    return {"family": "Poisson (log link, linear trend in years)",
             "effect_pct": float(pct.mean()),
             "effect_pct_hdi95": [float(lo), float(hi)],
-            "max_r_hat": float(az.rhat(idata).to_array().max())}
+            "max_r_hat": max_rhat, "divergences": div}
 
 
 # --------------------------------------------------------------------------
@@ -280,11 +330,7 @@ def make_plots(d, its, frame, primary, placebos, pl, gate) -> None:
     fig.tight_layout(); fig.savefig(OUT / "inflow-decomposition.png", dpi=130); plt.close(fig)
 
     # 2. observed vs counterfactual
-    cf = np.asarray(its.post_pred["posterior_predictive"]["y_hat"].transpose(
-        "chain", "draw", "obs_ind", "treated_units")).reshape(-1, len(post))
-    mu = obs_mu = np.asarray(post[OUTCOME], dtype=float) - np.asarray(
-        its.post_impact.transpose("chain", "draw", "obs_ind", "treated_units")
-    ).reshape(-1, len(post))
+    mu = np.asarray(post[OUTCOME], dtype=float) - draws_by_obs(its.post_impact, len(post))
     lo, hi = np.percentile(mu, [2.5, 97.5], axis=0)
     fig, a = plt.subplots(figsize=(11, 4.2))
     a.plot(d.index, d[OUTCOME], lw=0.5, color="#999", alpha=0.6, label="observed (daily)")
@@ -305,8 +351,8 @@ def make_plots(d, its, frame, primary, placebos, pl, gate) -> None:
     # 3. residual gate
     pre_idx = frame.index[frame.index < TREATMENT]
     obs_pre = frame.loc[pre_idx, OUTCOME].astype(float).values
-    pred = np.asarray(its.pre_pred["posterior_predictive"]["y_hat"].transpose(
-        "chain", "draw", "obs_ind", "treated_units")).reshape(-1, len(pre_idx)).mean(axis=0)
+    pred = draws_by_obs(pred_da(its.pre_pred),
+                        len(pre_idx)).mean(axis=0)
     e = obs_pre - pred
     fig, ax = plt.subplots(1, 3, figsize=(13, 3.4))
     ax[0].scatter(pre_idx, e, s=3, alpha=0.4); ax[0].axhline(0, color="k", lw=0.8)
@@ -528,7 +574,7 @@ def main() -> None:
         "sensitivity": sens,
         "poisson_robustness": pois,
         "mcmc": {"max_r_hat": round(rhat, 4), "divergences": div, "min_ess": round(ess, 1)},
-        "pre_period_r2": round(float(np.asarray(its.score["unit_0_r2"]).mean()), 4),
+        "pre_period_r2": round(pre_r2(its), 4),
         "spec_selection": spec,
         "seed": SEED,
         "provenance": {"data": "1-data/derived/daily.csv",
