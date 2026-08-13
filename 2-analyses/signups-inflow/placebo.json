@@ -1,0 +1,130 @@
+{
+  "real_effect_pct": -1.5537,
+  "placebo_effects_pct": [
+    1.6815,
+    0.0507,
+    -1.6938,
+    -1.8992,
+    -2.3121,
+    -0.0815,
+    1.7698,
+    0.6862,
+    1.7039,
+    1.4081,
+    1.7312,
+    3.059
+  ],
+  "placebo_detail": [
+    {
+      "fake_date": "2024-10-05",
+      "effect_pct": 1.6815,
+      "effect_pct_hdi95": [
+        -5.7323,
+        9.6665
+      ],
+      "hdi_contains_zero": true
+    },
+    {
+      "fake_date": "2024-11-06",
+      "effect_pct": 0.0507,
+      "effect_pct_hdi95": [
+        -5.426,
+        6.8964
+      ],
+      "hdi_contains_zero": true
+    },
+    {
+      "fake_date": "2024-12-09",
+      "effect_pct": -1.6938,
+      "effect_pct_hdi95": [
+        -7.6276,
+        3.8649
+      ],
+      "hdi_contains_zero": true
+    },
+    {
+      "fake_date": "2025-01-11",
+      "effect_pct": -1.8992,
+      "effect_pct_hdi95": [
+        -7.143,
+        4.1644
+      ],
+      "hdi_contains_zero": true
+    },
+    {
+      "fake_date": "2025-02-12",
+      "effect_pct": -2.3121,
+      "effect_pct_hdi95": [
+        -6.6744,
+        2.6359
+      ],
+      "hdi_contains_zero": true
+    },
+    {
+      "fake_date": "2025-03-17",
+      "effect_pct": -0.0815,
+      "effect_pct_hdi95": [
+        -4.3409,
+        4.5297
+      ],
+      "hdi_contains_zero": true
+    },
+    {
+      "fake_date": "2025-04-19",
+      "effect_pct": 1.7698,
+      "effect_pct_hdi95": [
+        -2.3317,
+        6.0386
+      ],
+      "hdi_contains_zero": true
+    },
+    {
+      "fake_date": "2025-05-22",
+      "effect_pct": 0.6862,
+      "effect_pct_hdi95": [
+        -3.0475,
+        4.9352
+      ],
+      "hdi_contains_zero": true
+    },
+    {
+      "fake_date": "2025-06-23",
+      "effect_pct": 1.7039,
+      "effect_pct_hdi95": [
+        -2.4916,
+        5.5721
+      ],
+      "hdi_contains_zero": true
+    },
+    {
+      "fake_date": "2025-07-26",
+      "effect_pct": 1.4081,
+      "effect_pct_hdi95": [
+        -2.1754,
+        5.1766
+      ],
+      "hdi_contains_zero": true
+    },
+    {
+      "fake_date": "2025-08-28",
+      "effect_pct": 1.7312,
+      "effect_pct_hdi95": [
+        -1.3688,
+        5.0681
+      ],
+      "hdi_contains_zero": true
+    },
+    {
+      "fake_date": "2025-09-30",
+      "effect_pct": 3.059,
+      "effect_pct_hdi95": [
+        -0.3195,
+        6.265
+      ],
+      "hdi_contains_zero": true
+    }
+  ],
+  "real_date_z": -1.2017,
+  "empirical_p": 0.3333,
+  "minimum_detectable_effect_pct": 4.8053
+}

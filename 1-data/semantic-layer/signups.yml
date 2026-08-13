@@ -1,0 +1,56 @@
+# Governed definition of signup inflow.
+#
+# Why this file exists: `signups` was load-bearing but ungoverned. Every
+# analysis in this repo leans on inflow being untouched by the intervention —
+# a treatment that moved inflow would move the `subscriber_pool` denominator
+# and contaminate the conversion effect — but nothing in the semantic layer
+# defined the metric or recorded that assumption, so it could not be checked.
+# Issue #10 asked to verify "the contract's own claim"; the claim was not in
+# the contract. It is now, with evidence attached instead of an assertion.
+
+outcome:
+  name: signups
+  definition: >-
+    Count of new free users registering on a given day. Gross inflow: it is
+    NOT net of churn and NOT net of conversions. Converters leave the
+    subscriber pool but are already counted here on their signup date, so
+    `signups` and `conversions` must never be differenced on the same day to
+    infer pool growth without also accounting for the pool's stock.
+  grain: daily
+  source: 1-data/derived/daily.csv
+  relation_to_pool: >-
+    subscriber_pool[t] - subscriber_pool[t-1] = signups[t] - conversions[t].
+    `signups` is the inflow term of that identity; it is an input to the
+    denominator of conv_rate, not an output of it.
+
+treatment_response:
+  claim: no detectable response to the 2026-04-01 price increase
+  evidence: i-c64a
+  bound: >-
+    Effect estimated at -1.55%, placebo-calibrated 95% interval
+    [-4.92%, +1.81%]. The design's minimum detectable effect is ~+/-4.81% at 80%
+    power, so this is a bound, not a proof of exact zero: an inflow change
+    smaller than ~5% would not have been detected. Do not cite this as
+    "signups are unaffected"; cite it as "no effect larger than ~5%".
+  status: >-
+    Validated null, not an assumption. Re-verify if the pre-period is
+    extended, the grain changes, or a new intervention is added — the bound
+    is specific to a 183-day post window at daily grain.
+
+intervention:
+  date: 2026-04-01
+  event: subscription price increase (~+33%)
+  guard_window: >-
+    Exclude the final 7 pre-treatment days from the counterfactual fit. The
+    hike was announced ~one week ahead (see 1-data/business-context.md), so
+    those days are contaminated for any outcome a user could act on early —
+    including signups, not just conversions.
+
+required_validation:
+  - residual diagnostics on the pre-period fit
+  - placebo-in-time sweep over >= 8 fake intervention dates
+  - >-
+    for a null result: an equivalence statement (ROPE) and a minimum
+    detectable effect. "Not significant" is not a finding on its own.
+
+version: 0.1.0
