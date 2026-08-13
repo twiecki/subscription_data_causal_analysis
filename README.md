@@ -8,6 +8,7 @@ without it rotting:
 |---|---|---|---|
 | **1 · Data** | derived layer + provenance | `1-data/` | every run re-derives numbers, each slightly differently |
 | **1 · Data** | the semantic layer (governed definitions) | `1-data/semantic-layer/` — one file per metric | the metric means four things; the agent picks one silently |
+| **1 · Data** | business context | `1-data/business-context.md` — why the questions get asked | the agent answers what was asked, not what was meant |
 | **2 · Analyses** | the analyses themselves | `2-analyses/` | work exists only in chats |
 | **2 · Analyses** | run tracking | `2-analyses/RUNS.csv` — one row per run, linked to its insight | nobody knows which run produced which number |
 | **2 · Analyses** | skills (discipline + verifier) | `2-analyses/skills/` — quasi-experiment-analysis, causal-critiquer | every run re-learns the same traps |
