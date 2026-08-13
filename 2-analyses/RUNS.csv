@@ -1,0 +1,2 @@
+run_id,date,analysis,command,outcome,artifacts
+r-123d,2026-08-13,price-hike-did-failure,uv run python 2-analyses/price-hike-did-failure/analysis.py,negative-result: DiD/SC infeasible; registered k-1231; fallback i-3fa2,failure.json;memo.md
