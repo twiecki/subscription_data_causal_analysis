@@ -9,11 +9,11 @@ without it rotting:
 | **1 · Data** | derived layer + provenance | `1-data/` | every run re-derives numbers, each slightly differently |
 | **1 · Data** | governed definitions (semantic layer) | `1-data/contracts/` | the metric means four things; the agent picks one silently |
 | **2 · Analyses** | the analyses themselves | `2-analyses/` | work exists only in chats |
-| **2 · Analyses** | skills (discipline) | `2-analyses/skills/` | every run re-learns the same traps |
+| **2 · Analyses** | skills (discipline + verifier) | `2-analyses/skills/` — quasi-experiment-analysis, causal-critiquer | every run re-learns the same traps |
 | **2 · Analyses** | evals (proof a skill helps) | `2-analyses/tasks/` + `eval.yml` | "seems to help" stays a vibe; models drift silently |
 | **2 · Analyses** | the agent loop (harness) | `agent-task.yml` — label an issue, get a PR | no queue, no audit, no independent review |
 | **3 · Insights** | claims as artifacts | `3-insights/registry.md` — stable IDs, status, binding hashes | refuted numbers keep steering decisions |
-| **3 · Insights** | workspace integrity | `3-insights/checks/` + `integrity.yml` | the repo is the agents' memory — and memory rots |
+| **3 · Insights** | workspace integrity + hygiene | `3-insights/checks/` + `3-insights/skills/consolidation-agent/` | the repo is the agents' memory — and memory rots |
 | **4 · Visibility** | the dashboard | `4-dashboard/app.py` (marimo, WASM-exportable) | the system's state lives in nobody's head |
 
 The through-line: **agents propose, deterministic checks decide, humans

@@ -42,7 +42,7 @@ jobs:
 
             House rules: read AGENTS.md. Cite insight IDs from
             3-insights/registry.md instead of restating values. If the label is
-            agent:consolidate, load 2-analyses/skills/consolidation-agent/SKILL.md and
+            agent:consolidate, load 3-insights/skills/consolidation-agent/SKILL.md and
             follow it. Run `python 3-insights/checks/integrity.py` and `pytest` before
             you finish. Open a pull request that references this issue.
           claude_args: "--allowedTools Bash,Read,Write,Edit,Glob,Grep"

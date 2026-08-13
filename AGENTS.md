@@ -11,7 +11,7 @@
   `python 3-insights/checks/integrity.py --rebind`.
 - **Before you finish:** `uv run pytest -q` and
   `uv run python 3-insights/checks/integrity.py` must both be green.
-- **Analysis discipline** lives in `2-analyses/skills/quasi-experiment-analysis/`;
-  repo hygiene lives in `2-analyses/skills/consolidation-agent/`.
+- **Analysis discipline** lives in `2-analyses/skills/` (quasi-experiment-analysis,
+  causal-critiquer); insight hygiene lives in `3-insights/skills/consolidation-agent/`.
 - Use `uv` for everything. Never commit `1-data/derived/` rebuild noise
   without rerunning the integrity suite.
