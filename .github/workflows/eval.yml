@@ -23,7 +23,7 @@ on:
   workflow_dispatch:
 
 env:
-  TASK: tasks/price-hike-causal-validation
+  TASK: 2-analyses/tasks/price-hike-causal-validation
 
 jobs:
   # ── Loop 1: every PR ─────────────────────────────────────────────
