@@ -1,0 +1,37 @@
+# Governed definition of the metric and the validation this analysis must run.
+# Read this before touching the data.
+
+outcome:
+  name: conv_rate
+  definition: conversions / subscriber_pool
+  grain: daily
+
+denominator:
+  name: subscriber_pool
+  definition: >-
+    Users who signed up but have not yet subscribed. Converters leave the
+    pool, so the denominator drifts — do not hand-roll a different one, and
+    do not mistake the drift for a treatment effect.
+
+intervention:
+  date: 2026-04-01
+  event: subscription price increase (~+33%)
+  guard_window: >-
+    Exclude the final 7 pre-treatment days from the counterfactual fit if
+    anticipation effects are plausible, and report how sensitive the
+    estimate is to this choice.
+
+required_validation:
+  - residual diagnostics on the pre-period fit
+  - placebo-in-time sweep over >= 8 fake intervention dates
+  - sensitivity of the effect to the anticipation guard window
+
+required_artifacts:
+  result.json: headline effect_pct (signed; a drop is negative) and estimand
+  placebo.json: real_effect_pct plus placebo_effects_pct list from the sweep
+  memo.md: claim, method, caveats
+  analysis.py: >-
+    The code that produced the numbers, saved as a runnable file. Inline-only
+    execution is not auditable — no code artifact, no trust.
+
+version: 0.2.0

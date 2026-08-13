@@ -2,3 +2,6 @@ jobs/
 results.csv
 __pycache__/
 .DS_Store
+data/derived/
+.venv/
+__pycache__/
