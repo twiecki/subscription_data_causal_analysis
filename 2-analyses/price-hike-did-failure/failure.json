@@ -1,0 +1,70 @@
+{
+  "run_id": "r-123d",
+  "analysis": "price-hike-did-failure",
+  "data_source": "1-data/derived/daily.csv",
+  "n_rows": 913,
+  "date_range": [
+    "2024-04-01",
+    "2026-09-30"
+  ],
+  "intervention_fact": "k-a1f4",
+  "outcome_fact": "k-77b0",
+  "candidate_unit_columns": [],
+  "columns_examined": {
+    "date": {
+      "dtype": "datetime64[us]",
+      "n_unique": 913,
+      "classification": "time index"
+    },
+    "subscriber_pool": {
+      "dtype": "int64",
+      "n_unique": 906,
+      "classification": "count"
+    },
+    "signups": {
+      "dtype": "int64",
+      "n_unique": 40,
+      "classification": "count"
+    },
+    "conversions": {
+      "dtype": "int64",
+      "n_unique": 51,
+      "classification": "count"
+    },
+    "conv_rate": {
+      "dtype": "float64",
+      "n_unique": 892,
+      "classification": "outcome"
+    },
+    "post": {
+      "dtype": "int64",
+      "n_unique": 2,
+      "classification": "treatment indicator"
+    },
+    "source_file": {
+      "dtype": "str",
+      "n_unique": 1,
+      "classification": "provenance"
+    },
+    "source_row": {
+      "dtype": "int64",
+      "n_unique": 913,
+      "classification": "provenance"
+    }
+  },
+  "did": {
+    "feasible": false,
+    "design_matrix_rank": 2,
+    "rank_required": 4,
+    "reason": "treated==1 for all rows; interaction collinear with post; estimand undefined"
+  },
+  "synthetic_control": {
+    "feasible": false,
+    "n_donors": 0,
+    "reason": "donor pool empty; simplex weight optimization has empty feasible set"
+  },
+  "causalpy_available": false,
+  "causalpy_error": null,
+  "fallback_that_worked": "i-3fa2",
+  "verdict": "DiD and synthetic control structurally unidentifiable on single-aggregate data; negative result registered as k-1231"
+}
