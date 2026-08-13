@@ -7,7 +7,7 @@ without it rotting:
 | layer | property | where it lives | what breaks without it |
 |---|---|---|---|
 | **1 · Data** | derived layer + provenance | `1-data/` | every run re-derives numbers, each slightly differently |
-| **1 · Data** | governed definitions (semantic layer) | `1-data/contracts/` | the metric means four things; the agent picks one silently |
+| **1 · Data** | the semantic layer (governed definitions) | `1-data/semantic-layer/` — one file per metric | the metric means four things; the agent picks one silently |
 | **2 · Analyses** | the analyses themselves | `2-analyses/` | work exists only in chats |
 | **2 · Analyses** | skills (discipline + verifier) | `2-analyses/skills/` — quasi-experiment-analysis, causal-critiquer | every run re-learns the same traps |
 | **2 · Analyses** | evals (proof a skill helps) | `2-analyses/tasks/` + `eval.yml` | "seems to help" stays a vibe; models drift silently |
