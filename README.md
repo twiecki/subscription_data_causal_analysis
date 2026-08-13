@@ -1,4 +1,44 @@
-# causal_analysis_skillsbench
+# A production-grade agentic data science repo
+
+One repo, all the pieces from the MADS course, interlocking — how you set up
+agentic data science so that *many* people and *many* agents can work it
+without it rotting:
+
+| property | where it lives | what breaks without it |
+|---|---|---|
+| Data layer with provenance | `data/` (build script, derived tables, `BUILD_REPORT`) | every session re-derives numbers, each slightly differently |
+| Invariant gate | `tests/test_data_layer.py` — red = layer off-limits | silent schema/refresh breakage feeds every analysis downstream |
+| Governed definitions | `contracts/metric-contract.yml` | "active users" means three things; the agent picks one silently |
+| Insights as artifacts | `insights/registry.md` — stable rolled IDs, status, evidence, binding hash | corrections don't propagate; refuted numbers keep steering decisions |
+| Workspace integrity | `checks/integrity.py` — references, binding, staleness, copy-drift, superseded citations (CI: `integrity.yml`) | the repo *is* the agents' memory, and memory rots |
+| Skills | `skills/` — analysis discipline + `consolidation-agent` | every run re-learns the same traps; nobody consolidates |
+| Evals | `tasks/` + `.github/workflows/eval.yml` (SkillsBench/Harbor format) | "the skill seems to help" stays a vibe; model updates silently regress |
+| Multi-agent loop | `.github/workflows/agent-task.yml` — label an issue, get a PR, fresh reviewer on request | agents work in one person's chat instead of a shared, auditable surface |
+| Dashboard | `dashboard/app.py` (marimo; WASM-exportable) | the state of the system lives in nobody's head |
+
+The through-line: **agents propose, deterministic checks decide, humans
+merge.** Judgment lives in text (skills, contracts); the non-negotiable
+checks live in code (pytest, integrity suite, verifier) — encode the
+invariants, not the entire path.
+
+## Quickstart
+
+```bash
+uv sync
+uv run python data/build_data.py     # build the derived layer
+uv run pytest -q                     # invariant gate
+uv run python checks/integrity.py    # workspace integrity (5 checks)
+uv run marimo run dashboard/app.py   # the dashboard
+```
+
+Try the multi-agent loop: open an issue describing an analysis, label it
+`agent:analyze` (or `agent:consolidate` for repo hygiene), and watch the PR
+arrive; label the PR `agent:review` for an independent critique. Needs
+`ANTHROPIC_API_KEY` as a repo secret.
+
+---
+
+## The benchmark underneath
 
 Causal-inference validation discipline, packaged as a
 [SkillsBench](https://github.com/benchflow-ai/skillsbench) task (Harbor

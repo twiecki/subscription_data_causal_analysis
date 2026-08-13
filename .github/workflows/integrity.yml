@@ -1,0 +1,20 @@
+# Loop 3: workspace integrity — the repo is the agents' memory, and memory
+# rots. Runs the reference/binding/staleness/copy-drift/superseded suite and
+# the data-layer invariant gate on every PR and push. No API keys needed.
+name: integrity
+
+on:
+  pull_request:
+  push:
+    branches: [main, production-repo]
+
+jobs:
+  integrity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv sync
+      - run: uv run python data/build_data.py
+      - run: uv run pytest tests/ -q
+      - run: uv run python checks/integrity.py

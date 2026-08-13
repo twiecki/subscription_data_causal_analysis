@@ -1,0 +1,65 @@
+# The label-driven multi-agent loop: GitHub is the harness.
+#
+#   issue + label `agent:analyze`     -> a headless agent works the task in a
+#                                        branch and opens a PR that cites
+#                                        insight IDs and closes the issue
+#   PR + label `agent:review`         -> a FRESH reviewer agent (no stake in
+#                                        the analysis) critiques the diff
+#   issue + label `agent:consolidate` -> the consolidation-agent skill brings
+#                                        living docs back in sync with the
+#                                        insights registry
+#
+# CI (integrity + skillsbench) stays the deterministic gate on every PR —
+# agents propose, checks decide, humans merge. Requires ANTHROPIC_API_KEY
+# as a repo secret.
+name: agent-task
+
+on:
+  issues:
+    types: [labeled]
+  pull_request:
+    types: [labeled]
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  analyze:
+    if: github.event.label.name == 'agent:analyze' || github.event.label.name == 'agent:consolidate'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Work the task in issue #${{ github.event.issue.number }}:
+
+            ${{ github.event.issue.title }}
+            ${{ github.event.issue.body }}
+
+            House rules: read AGENTS.md. Cite insight IDs from
+            insights/registry.md instead of restating values. If the label is
+            agent:consolidate, load skills/consolidation-agent/SKILL.md and
+            follow it. Run `python checks/integrity.py` and `pytest` before
+            you finish. Open a pull request that references this issue.
+          claude_args: "--allowedTools Bash,Read,Write,Edit,Glob,Grep"
+
+  review:
+    if: github.event.label.name == 'agent:review'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            You are a fresh reviewer with no stake in this analysis. Review
+            PR #${{ github.event.pull_request.number }} adversarially:
+            decisions, not code style. Check claims against
+            insights/registry.md, verify checks/integrity.py and pytest pass,
+            and try to refute the headline conclusion. Post your critique as
+            a PR comment: ranked findings, hard evidence first.
+          claude_args: "--allowedTools Bash,Read,Glob,Grep"
