@@ -3,7 +3,7 @@
 - **Numbers come from the data layer** (`1-data/derived/`, provenance on every
   row), never re-derived from raw files. Red test in `tests/` = layer
   off-limits; rebuild with `python 1-data/build_data.py` and investigate.
-- **Definitions come from `1-data/contracts/metric-contract.yml`** — the governed
+- **Definitions come from the semantic layer** (`1-data/semantic-layer/`) — the governed
   outcome, grain, guard window. Don't invent metrics.
 - **Claims are cited, not restated.** Reference insight IDs from
   `3-insights/registry.md` as `[[i-xxxx]]`. New finding → new rolled ID (4 hex

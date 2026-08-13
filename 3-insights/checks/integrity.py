@@ -85,8 +85,8 @@ if DERIVED.exists():
 
 # 4 copy-drift
 task_contract = ROOT / "2-analyses/tasks/price-hike-causal-validation/environment/metric-contract.yml"
-if task_contract.exists() and sha12(task_contract) != sha12(ROOT / "1-data/contracts/metric-contract.yml"):
-    failures.append("[copy-drift] task metric-contract.yml differs from contracts/metric-contract.yml — one fact, one place")
+if task_contract.exists() and sha12(task_contract) != sha12(ROOT / "1-data/semantic-layer/conv_rate.yml"):
+    failures.append("[copy-drift] task metric-contract.yml differs from 1-data/semantic-layer/conv_rate.yml — one fact, one place")
 
 # 5 superseded citations (a living doc may mention a superseded ID only in its own supersession note)
 superseded = {r["id"] for r in rows if r["status"].startswith("superseded")}
