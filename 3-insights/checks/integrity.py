@@ -28,7 +28,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 REGISTRY = ROOT / "3-insights/registry.md"
 ALIAS = ROOT / "3-insights/alias.tsv"
-LIVING = [ROOT / "README.md", *ROOT.glob("2-analyses/*/[!t]*.md"), *ROOT.glob("4-dashboard/**/*.py")]
+LIVING = [ROOT / "README.md", ROOT / "1-data/business-context.md", *ROOT.glob("2-analyses/*/[!t]*.md"), *ROOT.glob("4-dashboard/**/*.py")]
 DERIVED = ROOT / "1-data/derived"
 REBIND = "--rebind" in sys.argv
 failures: list[str] = []
