@@ -12,6 +12,10 @@
   `3-insights/registry.md` as `[[i-xxxx]]`. New finding → new ID via
   `python 3-insights/mint_id.py` (never hand-rolled, never reused), registered with source + evidence, bound via
   `python 3-insights/checks/integrity.py --rebind`.
+- **Every analysis run appends a row to `2-analyses/RUNS.csv`** — run id,
+  date, model, seed, headline, resulting insight ID. Which run produced
+  which artifact must be answerable a year later (MLflow at scale; the
+  property is what matters).
 - **Before you finish:** `uv run pytest -q` and
   `uv run python 3-insights/checks/integrity.py` must both be green.
 - **Analysis discipline** lives in `2-analyses/skills/` (quasi-experiment-analysis,

@@ -10,6 +10,7 @@ without it rotting:
 | **1 · Data** | the semantic layer (governed definitions) | `1-data/semantic-layer/` — one file per metric | the metric means four things; the agent picks one silently |
 | **1 · Data** | business context | `1-data/business-context.md` — why the questions get asked | the agent answers what was asked, not what was meant |
 | **2 · Analyses** | the analyses themselves | `2-analyses/` | work exists only in chats |
+| **2 · Analyses** | run tracking | `2-analyses/RUNS.csv` — one row per run, linked to its insight | nobody knows which run produced which number |
 | **2 · Analyses** | skills (discipline + verifier) | `2-analyses/skills/` — quasi-experiment-analysis, causal-critiquer | every run re-learns the same traps |
 | **2 · Analyses** | evals (proof a skill helps) | `2-analyses/tasks/` + `eval.yml` | "seems to help" stays a vibe; models drift silently |
 | **2 · Analyses** | the agent loop (harness) | `agent-task.yml` — label an issue, get a PR | no queue, no audit, no independent review |

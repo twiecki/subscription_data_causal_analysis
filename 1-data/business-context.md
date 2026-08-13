@@ -24,7 +24,7 @@ why revenue-per-conversion is below +33% early in the post period).
 | who | asks | actually means | governed answer |
 |---|---|---|---|
 | Growth | "did the hike hurt conversion?" | the causal effect on [[k-77b0]], not the raw pre/post diff | [[i-3fa2]] |
-| Finance / board | "was it worth it?" | net **revenue**, not conversion — the decision metric | the revenue analysis (issue #2) |
+| Finance / board | "was it worth it?" | net **revenue**, not conversion — the decision metric | [[i-b7d3]] |
 | Support / comms | "are users angry?" | out of scope for this repo — no sentiment data |  |
 
 Ambient references you will hear: **"the hike"** = the 2026-04-01 change
@@ -34,7 +34,7 @@ growth, not a data error).
 
 ## Decision frame
 
-The effect is not the decision. Conversion went down AND the bet still
-paid off (see the revenue insight once issue #2 lands) — an analysis that stops at the conversion effect answers the
+The effect is not the decision. Conversion went down AND the bet paid off
+([[i-b7d3]]) — an analysis that stops at the conversion effect answers the
 wrong question. Carry uncertainty into the revenue quantity before anyone
 decides about rolling back the price.
