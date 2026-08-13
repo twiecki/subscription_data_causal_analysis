@@ -264,3 +264,15 @@ is not.
   control units be genuinely comparable and unaffected by the treatment.
 - See the `causalpy-library` skill for API gotchas (e.g. `cp.skl_models.Linear
   Regression` does not exist; `did.plot()` can crash on recent matplotlib).
+
+## Ship the decision, not just the effect
+
+*(added after the revenue-impact run — the effect is not the decision)*
+
+A causal effect on a proximate metric (conversion, clicks, churn) is an
+input, not an answer. Before shipping, propagate the effect **posterior**
+into the quantity the decision actually uses (revenue, cost, margin) —
+by Monte-Carlo over the posterior, never point-times-point. Cite the
+upstream insight ID as the input; register the business-level finding as
+its own insight. A stakeholder should never have to do this arithmetic
+in their head.
