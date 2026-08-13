@@ -3,7 +3,7 @@ name = "agentic-ds-production-repo"
 version = "0.1.0"
 description = "Production-grade agentic data science repo — MADS course example"
 requires-python = ">=3.11"
-dependencies = ["pandas>=2.0", "marimo>=0.13", "pytest>=8.0", "pyyaml>=6.0"]
+dependencies = ["pandas>=2.0", "marimo>=0.13", "pytest>=8.0", "pyyaml>=6.0", "matplotlib>=3.8", "numpy>=1.26"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
