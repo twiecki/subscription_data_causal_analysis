@@ -31,7 +31,7 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(ROOT, mo, pd, re):
     _rows = []
-    for _line in (ROOT / "insights/registry.md").read_text().splitlines():
+    for _line in (ROOT / "3-insights/registry.md").read_text().splitlines():
         _m = re.match(r"\|\s*([ik]-[0-9a-f]{4})\s*\|([^|]*)\|([^|]*)\|([^|]*)\|([^|]*)\|", _line)
         if _m:
             _rows.append({"id": _m.group(1), "status": _m.group(2).strip(),
@@ -55,15 +55,15 @@ def _(insights):
 
 @app.cell(hide_code=True)
 def _(ROOT, mo, pd):
-    _p = ROOT / "data/derived/daily.csv"
+    _p = ROOT / "1-data/derived/daily.csv"
     if _p.exists():
         _df = pd.read_csv(_p, parse_dates=["date"])
         _out = mo.vstack([
             mo.md(f"## Data layer\n`{len(_df)}` rows · {_df.date.min().date()} → {_df.date.max().date()} · provenance on every row"),
-            mo.md("```\n" + (ROOT / "data/derived/BUILD_REPORT.txt").read_text() + "```"),
+            mo.md("```\n" + (ROOT / "1-data/derived/BUILD_REPORT.txt").read_text() + "```"),
         ])
     else:
-        _out = mo.md("## Data layer\n_not built — run `python data/build_data.py`_")
+        _out = mo.md("## Data layer\n_not built — run `python 1-data/build_data.py`_")
     _out
     return
 
@@ -84,7 +84,7 @@ def _(ROOT, mo, pd):
     import matplotlib.pyplot as plt
     import numpy as np
 
-    _df = pd.read_csv(ROOT / "data/derived/daily.csv", parse_dates=["date"])
+    _df = pd.read_csv(ROOT / "1-data/derived/daily.csv", parse_dates=["date"])
     _df["rate_pct"] = 100 * _df["conv_rate"]
     _t0 = pd.Timestamp("2026-04-01")
     _fit = _df[(_df.post == 0) & (_df.date >= _df.date.min() + pd.Timedelta(days=30))]

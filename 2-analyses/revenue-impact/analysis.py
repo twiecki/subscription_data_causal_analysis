@@ -23,7 +23,7 @@ rng = np.random.default_rng(20260401)
 eff = rng.normal(EFF_MEAN, EFF_SD, 20_000)
 uplift = (1 + PRICE_UPLIFT) * (1 + eff) - 1
 
-df = pd.read_csv(ROOT / "data/derived/daily.csv", parse_dates=["date"])
+df = pd.read_csv(ROOT / "1-data/derived/daily.csv", parse_dates=["date"])
 post = df[df.post == 1]
 
 lo, hi = np.percentile(uplift, [2.5, 97.5])

@@ -41,9 +41,9 @@ jobs:
             ${{ github.event.issue.body }}
 
             House rules: read AGENTS.md. Cite insight IDs from
-            insights/registry.md instead of restating values. If the label is
-            agent:consolidate, load skills/consolidation-agent/SKILL.md and
-            follow it. Run `python checks/integrity.py` and `pytest` before
+            3-insights/registry.md instead of restating values. If the label is
+            agent:consolidate, load 2-analyses/skills/consolidation-agent/SKILL.md and
+            follow it. Run `python 3-insights/checks/integrity.py` and `pytest` before
             you finish. Open a pull request that references this issue.
           claude_args: "--allowedTools Bash,Read,Write,Edit,Glob,Grep"
 
@@ -59,7 +59,7 @@ jobs:
             You are a fresh reviewer with no stake in this analysis. Review
             PR #${{ github.event.pull_request.number }} adversarially:
             decisions, not code style. Check claims against
-            insights/registry.md, verify checks/integrity.py and pytest pass,
+            3-insights/registry.md, verify 3-insights/checks/integrity.py and pytest pass,
             and try to refute the headline conclusion. Post your critique as
             a PR comment: ranked findings, hard evidence first.
           claude_args: "--allowedTools Bash,Read,Glob,Grep"

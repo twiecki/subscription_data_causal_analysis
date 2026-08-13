@@ -8,7 +8,7 @@ Inputs, cited not restated: the conversion effect posterior [[i-3fa2]], the
 governed intervention [[k-a1f4]] (+33% price), and the governed outcome
 definition [[k-77b0]]. Computation: Monte-Carlo propagation of the effect
 posterior into `(1 + price_uplift) * (1 + effect) - 1`, over the post
-period from the derived data layer (`analyses/revenue-impact/analysis.py`,
+period from the derived data layer (`2-analyses/revenue-impact/analysis.py`,
 seeded).
 
 **Decision read:** the conversion loss [[i-3fa2]] is more than offset by

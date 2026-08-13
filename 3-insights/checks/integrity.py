@@ -25,11 +25,11 @@ import re
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-REGISTRY = ROOT / "insights/registry.md"
-ALIAS = ROOT / "insights/alias.tsv"
-LIVING = [ROOT / "README.md", *ROOT.glob("analyses/**/*.md"), *ROOT.glob("dashboard/**/*.py")]
-DERIVED = ROOT / "data/derived"
+ROOT = Path(__file__).resolve().parents[2]
+REGISTRY = ROOT / "3-insights/registry.md"
+ALIAS = ROOT / "3-insights/alias.tsv"
+LIVING = [ROOT / "README.md", *ROOT.glob("2-analyses/*/[!t]*.md"), *ROOT.glob("4-dashboard/**/*.py")]
+DERIVED = ROOT / "1-data/derived"
 REBIND = "--rebind" in sys.argv
 failures: list[str] = []
 
@@ -77,15 +77,15 @@ if text != REGISTRY.read_text():
 
 # 3 staleness
 if DERIVED.exists():
-    raws = list((ROOT / "data/raw").glob("*")) + [ROOT / "data/build_data.py"]
+    raws = list((ROOT / "1-data/raw").glob("*")) + [ROOT / "1-data/build_data.py"]
     newest_src = max(p.stat().st_mtime for p in raws)
     for d in DERIVED.glob("*.csv"):
         if d.stat().st_mtime < newest_src:
             failures.append(f"[staleness] {d.relative_to(ROOT)} is older than its sources — rebuild the layer")
 
 # 4 copy-drift
-task_contract = ROOT / "tasks/price-hike-causal-validation/environment/metric-contract.yml"
-if task_contract.exists() and sha12(task_contract) != sha12(ROOT / "contracts/metric-contract.yml"):
+task_contract = ROOT / "2-analyses/tasks/price-hike-causal-validation/environment/metric-contract.yml"
+if task_contract.exists() and sha12(task_contract) != sha12(ROOT / "1-data/contracts/metric-contract.yml"):
     failures.append("[copy-drift] task metric-contract.yml differs from contracts/metric-contract.yml — one fact, one place")
 
 # 5 superseded citations (a living doc may mention a superseded ID only in its own supersession note)

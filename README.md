@@ -6,15 +6,15 @@ without it rotting:
 
 | layer | property | where it lives | what breaks without it |
 |---|---|---|---|
-| **1 · Data** | derived layer + provenance | `data/`, `tests/` | every run re-derives numbers, each slightly differently |
-| **1 · Data** | governed definitions (semantic layer) | `contracts/metric-contract.yml` | the metric means four things; the agent picks one silently |
-| **2 · Analyses** | the analyses themselves | `analyses/` | work exists only in chats |
-| **2 · Analyses** | skills (discipline) | `skills/` | every run re-learns the same traps |
-| **2 · Analyses** | evals (proof a skill helps) | `tasks/` + `eval.yml` | "seems to help" stays a vibe; models drift silently |
+| **1 · Data** | derived layer + provenance | `1-data/` | every run re-derives numbers, each slightly differently |
+| **1 · Data** | governed definitions (semantic layer) | `1-data/contracts/` | the metric means four things; the agent picks one silently |
+| **2 · Analyses** | the analyses themselves | `2-analyses/` | work exists only in chats |
+| **2 · Analyses** | skills (discipline) | `2-analyses/skills/` | every run re-learns the same traps |
+| **2 · Analyses** | evals (proof a skill helps) | `2-analyses/tasks/` + `eval.yml` | "seems to help" stays a vibe; models drift silently |
 | **2 · Analyses** | the agent loop (harness) | `agent-task.yml` — label an issue, get a PR | no queue, no audit, no independent review |
-| **3 · Insights** | claims as artifacts | `insights/registry.md` — stable IDs, status, binding hashes | refuted numbers keep steering decisions |
-| **3 · Insights** | workspace integrity | `checks/integrity.py` + `integrity.yml` | the repo is the agents' memory — and memory rots |
-| **4 · Visibility** | the dashboard | `dashboard/app.py` (marimo, WASM-exportable) | the system's state lives in nobody's head |
+| **3 · Insights** | claims as artifacts | `3-insights/registry.md` — stable IDs, status, binding hashes | refuted numbers keep steering decisions |
+| **3 · Insights** | workspace integrity | `3-insights/checks/` + `integrity.yml` | the repo is the agents' memory — and memory rots |
+| **4 · Visibility** | the dashboard | `4-dashboard/app.py` (marimo, WASM-exportable) | the system's state lives in nobody's head |
 
 The through-line: **agents propose, deterministic checks decide, humans
 merge.** Judgment lives in text (skills, contracts); the non-negotiable
@@ -25,10 +25,10 @@ invariants, not the entire path.
 
 ```bash
 uv sync
-uv run python data/build_data.py     # build the derived layer
+uv run python 1-data/build_data.py   # build the derived layer
 uv run pytest -q                     # invariant gate
-uv run python checks/integrity.py    # workspace integrity (5 checks)
-uv run marimo run dashboard/app.py   # the dashboard
+uv run python 3-insights/checks/integrity.py  # workspace integrity (5 checks)
+uv run marimo run 4-dashboard/app.py # the dashboard
 ```
 
 Try the multi-agent loop: open an issue describing an analysis, label it
