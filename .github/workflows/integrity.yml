@@ -18,3 +18,11 @@ jobs:
       - run: uv run python 1-data/build_data.py
       - run: uv run pytest -q
       - run: uv run python 3-insights/checks/integrity.py
+      - name: alias table is append-only
+        run: |
+          git fetch origin main --depth 1
+          if git cat-file -e origin/main:3-insights/alias.tsv 2>/dev/null; then
+            git show origin/main:3-insights/alias.tsv > /tmp/alias_main.tsv
+            head -n "$(wc -l < /tmp/alias_main.tsv)" 3-insights/alias.tsv | diff /tmp/alias_main.tsv - \
+              || { echo "alias.tsv rewrote or removed existing lines — it is append-only"; exit 1; }
+          fi

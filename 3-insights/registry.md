@@ -7,7 +7,9 @@ neighbor). The ID names the *claim*; the `sha256_12` column binds it to the
 current bytes of its source (`--rebind` after editing a source on purpose).
 Everything else in this repo **cites these IDs** instead of restating values.
 Refuted insights are superseded, never edited in place; retired IDs live in
-`alias.tsv` forever.
+`alias.tsv` forever (append-only — CI enforces it). Mint new IDs with
+`python 3-insights/mint_id.py [i|k|r]`; the `i-`/`k-`/`r-` namespace is
+**reserved** — never hand-write lookalike tokens in documents.
 
 | id | status | claim | source | evidence | sha256_12 |
 |---|---|---|---|---|---|
