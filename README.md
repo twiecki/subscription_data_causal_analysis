@@ -4,17 +4,17 @@ One repo, all the pieces from the MADS course, interlocking — how you set up
 agentic data science so that *many* people and *many* agents can work it
 without it rotting:
 
-| property | where it lives | what breaks without it |
-|---|---|---|
-| Data layer with provenance | `data/` (build script, derived tables, `BUILD_REPORT`) | every session re-derives numbers, each slightly differently |
-| Invariant gate | `tests/test_data_layer.py` — red = layer off-limits | silent schema/refresh breakage feeds every analysis downstream |
-| Governed definitions | `contracts/metric-contract.yml` | "active users" means three things; the agent picks one silently |
-| Insights as artifacts | `insights/registry.md` — stable rolled IDs, status, evidence, binding hash | corrections don't propagate; refuted numbers keep steering decisions |
-| Workspace integrity | `checks/integrity.py` — references, binding, staleness, copy-drift, superseded citations (CI: `integrity.yml`) | the repo *is* the agents' memory, and memory rots |
-| Skills | `skills/` — analysis discipline + `consolidation-agent` | every run re-learns the same traps; nobody consolidates |
-| Evals | `tasks/` + `.github/workflows/eval.yml` (SkillsBench/Harbor format) | "the skill seems to help" stays a vibe; model updates silently regress |
-| Multi-agent loop | `.github/workflows/agent-task.yml` — label an issue, get a PR, fresh reviewer on request | agents work in one person's chat instead of a shared, auditable surface |
-| Dashboard | `dashboard/app.py` (marimo; WASM-exportable) | the state of the system lives in nobody's head |
+| layer | property | where it lives | what breaks without it |
+|---|---|---|---|
+| **1 · Data** | derived layer + provenance | `1-data/` | every run re-derives numbers, each slightly differently |
+| **1 · Data** | governed definitions (semantic layer) | `1-data/contracts/` | the metric means four things; the agent picks one silently |
+| **2 · Analyses** | the analyses themselves | `2-analyses/` | work exists only in chats |
+| **2 · Analyses** | skills (discipline + verifier) | `2-analyses/skills/` — quasi-experiment-analysis, causal-critiquer | every run re-learns the same traps |
+| **2 · Analyses** | evals (proof a skill helps) | `2-analyses/tasks/` + `eval.yml` | "seems to help" stays a vibe; models drift silently |
+| **2 · Analyses** | the agent loop (harness) | `agent-task.yml` — label an issue, get a PR | no queue, no audit, no independent review |
+| **3 · Insights** | claims as artifacts | `3-insights/registry.md` — stable IDs, status, binding hashes | refuted numbers keep steering decisions |
+| **3 · Insights** | workspace integrity + hygiene | `3-insights/checks/` + `3-insights/skills/consolidation-agent/` | the repo is the agents' memory — and memory rots |
+| **4 · Visibility** | the dashboard | `4-dashboard/app.py` (marimo, WASM-exportable) | the system's state lives in nobody's head |
 
 The through-line: **agents propose, deterministic checks decide, humans
 merge.** Judgment lives in text (skills, contracts); the non-negotiable
@@ -25,10 +25,10 @@ invariants, not the entire path.
 
 ```bash
 uv sync
-uv run python data/build_data.py     # build the derived layer
+uv run python 1-data/build_data.py   # build the derived layer
 uv run pytest -q                     # invariant gate
-uv run python checks/integrity.py    # workspace integrity (5 checks)
-uv run marimo run dashboard/app.py   # the dashboard
+uv run python 3-insights/checks/integrity.py  # workspace integrity (5 checks)
+uv run marimo run 4-dashboard/app.py # the dashboard
 ```
 
 Try the multi-agent loop: open an issue describing an analysis, label it

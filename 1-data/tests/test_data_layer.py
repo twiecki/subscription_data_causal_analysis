@@ -2,7 +2,7 @@
 from pathlib import Path
 import pandas as pd
 
-DERIVED = Path(__file__).resolve().parents[1] / "data/derived/daily.csv"
+DERIVED = Path(__file__).resolve().parents[1] / "derived/daily.csv"
 
 
 def _df():
