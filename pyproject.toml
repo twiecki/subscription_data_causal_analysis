@@ -5,5 +5,14 @@ description = "Production-grade agentic data science repo — MADS course exampl
 requires-python = ">=3.11"
 dependencies = ["pandas>=2.0", "marimo>=0.13", "pytest>=8.0", "pyyaml>=6.0", "matplotlib>=3.8", "numpy>=1.26"]
 
+# The causal stack is an optional extra, not a core dependency: CI's gates
+# (pytest + integrity suite) must stay fast and compiler-free, while the
+# analyses under 2-analyses/ need a sampler.
+#   uv sync --extra causal   then   uv run python 2-analyses/<run>/analysis.py
+# nutpie is not optional in practice — without a C compiler pytensor falls back
+# to its Python backend and a single ITS fit takes ~9 minutes instead of ~20s.
+[project.optional-dependencies]
+causal = ["causalpy>=0.8", "pymc>=5.20", "arviz>=0.20", "scipy>=1.11", "nutpie>=0.13", "numba>=0.60"]
+
 [tool.pytest.ini_options]
 testpaths = ["1-data/tests"]
