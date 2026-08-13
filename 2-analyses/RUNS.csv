@@ -1,2 +1,2 @@
 run_id,date,issue,outcome,insight_id,artifacts,gates,note
-r-3113,2026-08-13,10,signups,i-c64a,2-analyses/signups-inflow/analysis.py;2-analyses/signups-inflow/memo.md;2-analyses/signups-inflow/result.json;2-analyses/signups-inflow/placebo.json,pytest+integrity,ITS on signup inflow; validated null bounded at +/-4.8% MDE; 12-date placebo sweep; adds k-099a governing signups
+r-3113,2026-08-13,10,signups,i-c64a,2-analyses/signups-inflow/analysis.py;2-analyses/signups-inflow/memo.md;2-analyses/signups-inflow/result.json;2-analyses/signups-inflow/placebo.json,pytest+integrity,ITS on signup inflow; validated null bounded at +/-4.81% MDE; 12-date placebo sweep; adds k-099a governing signups

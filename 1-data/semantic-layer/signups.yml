@@ -27,8 +27,8 @@ treatment_response:
   claim: no detectable response to the 2026-04-01 price increase
   evidence: i-c64a
   bound: >-
-    Effect estimated at -1.6%, placebo-calibrated 95% interval
-    [-4.9%, +1.8%]. The design's minimum detectable effect is ~+/-4.8% at 80%
+    Effect estimated at -1.55%, placebo-calibrated 95% interval
+    [-4.92%, +1.81%]. The design's minimum detectable effect is ~+/-4.81% at 80%
     power, so this is a bound, not a proof of exact zero: an inflow change
     smaller than ~5% would not have been detected. Do not cite this as
     "signups are unaffected"; cite it as "no effect larger than ~5%".
